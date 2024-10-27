@@ -12,6 +12,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store";
 import { setUser } from "@/store/userSlice";
+import { useRootContext } from "@/context/rootContext";
 
 interface Props {}
 
@@ -27,13 +28,15 @@ const LoginForm: NextPage<Props> = ({}) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
-
+  const { setLoading: setMainLoading } = useRootContext();
   const onSubmit = async (values: FormValues) => {
     setLoading(true);
+    setMainLoading(true);
     try {
       const { data } = await axios.post("/api/auth/login", values);
       dispatch(setUser(data?.user));
       setLoading(false);
+      setMainLoading(false);
       router.push("/");
     } catch (error: any) {
       console.error(error);
@@ -47,6 +50,7 @@ const LoginForm: NextPage<Props> = ({}) => {
       }
       setErrorMessage(error?.response?.data?.error || "Internal issue");
       setLoading(false);
+      setMainLoading(false);
     }
   };
 

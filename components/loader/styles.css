@@ -1,0 +1,32 @@
+.progress {
+  content: "";
+  width: 1px;
+  height: 2px;
+  border-radius: 1px;
+  background-image: linear-gradient(to right, #fa709a 0%, #fee140 100%);
+  /* background: rgb(144, 75, 246); */
+  transition: 0.5s;
+  animation: loading1274 2s ease infinite;
+}
+
+@keyframes loading1274 {
+  0% {
+    width: 0%;
+  }
+
+  10% {
+    width: 10%;
+  }
+
+  50% {
+    width: 40%;
+  }
+
+  60% {
+    width: 60%;
+  }
+
+  100% {
+    width: 100%;
+  }
+}

@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 const inter = Inter({ subsets: ["latin"] });
 import dynamic from "next/dynamic";
+import LoaderComponent from "@/components/loader";
+import { RootProvider } from "@/context/rootContext";
 
 const ReduxProvider = dynamic(() => import("@/store/redux-provider"), {
   ssr: false,
@@ -35,7 +37,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <ReduxProvider>{children}</ReduxProvider>
+          <ReduxProvider>
+            <RootProvider>
+              <LoaderComponent />
+              {children}
+            </RootProvider>
+          </ReduxProvider>
         </ThemeProvider>
         <Toaster position="top-right" richColors closeButton />
       </body>

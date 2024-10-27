@@ -4,6 +4,7 @@ import { NextPage } from "next";
 import { Loader, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useRootContext } from "@/context/rootContext";
 
 interface Props {}
 
@@ -11,14 +12,18 @@ const Page: NextPage<Props> = ({}) => {
   const [loading, setLoading] = useState(false);
   const { storyPath } = useParams();
   const router = useRouter();
+  const { setLoading: setMainLoading } = useRootContext();
+
   const handleClose = () => {
     router.push("/");
   };
 
   useEffect(() => {
     setLoading(true);
+    setMainLoading(true);
     setTimeout(() => {
       setLoading(false);
+      setMainLoading(false);
     }, 1000);
   }, []);
 

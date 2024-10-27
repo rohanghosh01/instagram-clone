@@ -3,12 +3,19 @@ import { cn } from "@/lib/utils";
 import { NextPage } from "next";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import { useAppDispatch } from "@/store";
 import { setUser } from "@/store/userSlice";
-
+import LoadingButton from "../loading-btn";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { useRootContext } from "@/context/rootContext";
 interface Props {}
 
 const VerifyForm: NextPage<Props> = ({}) => {
@@ -20,6 +27,8 @@ const VerifyForm: NextPage<Props> = ({}) => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const dispatch = useAppDispatch();
+  const { setLoading: setMainLoading } = useRootContext();
+
   // Handle countdown timer for resending OTP
   useEffect(() => {
     if (resendCooldown > 0) {
@@ -33,16 +42,20 @@ const VerifyForm: NextPage<Props> = ({}) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
+    setMainLoading(true);
     try {
+      if (!email) throw new Error("Email is required");
       const res = await axios.post("/api/auth/verify", { otp: code, email });
       dispatch(setUser(res.data?.user));
       setLoading(false);
+      setMainLoading(false);
       router.push("/");
       setErrorMessage("");
     } catch (error: any) {
       console.error(error);
       setErrorMessage(error?.response?.data?.error || "Internal issue");
       setLoading(false);
+      setMainLoading(false);
     }
   };
 
@@ -57,6 +70,8 @@ const VerifyForm: NextPage<Props> = ({}) => {
       }
     }
   };
+
+  if (!email) redirect("/accounts");
 
   return (
     <>
@@ -79,17 +94,21 @@ const VerifyForm: NextPage<Props> = ({}) => {
         </span>
       </div>
       <form onSubmit={handleSubmit}>
-        <div className="relative mb-4 h-10">
-          <div className="relative border border-gray-300 rounded-[2px] px-2 py-1">
-            <input
-              type="number"
-              id="username"
-              className="w-full h-5 bg-transparent focus:outline-none text-[13px] "
-              autoComplete="off"
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Confirmation Code"
-            />
-          </div>
+        <div className="relative mb-4 h-10 flex justify-center">
+          <InputOTP
+            maxLength={6}
+            value={code}
+            onChange={(value) => setCode(value)}
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
         </div>
 
         <button
@@ -100,7 +119,7 @@ const VerifyForm: NextPage<Props> = ({}) => {
           )}
           disabled={!code || loading}
         >
-          Submit
+          <LoadingButton loading={loading} text="Submit" />
         </button>
         {errorMessage && (
           <div className="text-red-500 text-center">{errorMessage}</div>
