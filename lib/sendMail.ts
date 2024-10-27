@@ -121,5 +121,8 @@ export const SendEmail = async ({
 };
 
 export const generateOTP = () => {
+  if (process.env.NEXT_PUBLIC_OTP_OPTIONAL) {
+    return 111111;
+  }
   return randomInt(100000, 999999); // Generates a 6-digit OTP
 };
