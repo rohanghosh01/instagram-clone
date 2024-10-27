@@ -7,6 +7,7 @@ import LoginFacebook from "./login-facebook";
 import LoadingButton from "../loading-btn";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useRootContext } from "@/context/rootContext";
 
 interface Props {}
 
@@ -24,14 +25,17 @@ const SignupForm: NextPage<Props> = ({}) => {
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const router = useRouter();
+  const { setLoading: setMainLoading } = useRootContext();
 
   //This password is too easy to guess. Please create a new one.
 
   const onSubmit = async (values: FormValues) => {
     setLoading(true);
+    setMainLoading(true);
     try {
       const res = await axios.post("/api/auth/register", values);
       setLoading(false);
+      setMainLoading(false);
       router.push(`/accounts/verify?email=${encodeURIComponent(values.email)}`);
       setErrorMessage("");
     } catch (error: any) {
@@ -41,6 +45,7 @@ const SignupForm: NextPage<Props> = ({}) => {
       }
       setErrorMessage(error?.response?.data?.error || "Internal issue");
       setLoading(false);
+      setMainLoading(false);
     }
   };
 

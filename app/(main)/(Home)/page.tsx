@@ -21,6 +21,7 @@ import { useInView } from "react-intersection-observer";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { refetchPost } from "@/store/postSlice";
+import { useRootContext } from "@/context/rootContext";
 const queryClient = new QueryClient();
 
 const Page = () => {
@@ -28,13 +29,18 @@ const Page = () => {
   const dispatch = useAppDispatch();
   const isNewPost = useAppSelector((state) => state.post.refetch);
   const postRef = useRef<HTMLDivElement>(null);
+  const { setLoading } = useRootContext();
+
   const fetchPosts = async ({ pageParam = 0 }) => {
     try {
+      setLoading(true);
       const response = await axios.get(
         `/api/post?offset=${pageParam}&limit=10`
       );
+      setLoading(false);
       return response.data; // Adjust based on your response
     } catch (error: any) {
+      setLoading(false);
       throw new Error(error.message);
     }
   };
