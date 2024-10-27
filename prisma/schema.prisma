@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String    @id @default(auto()) @map("_id") @db.ObjectId
+  countryCode          String?
+  password             String
+  username             String    @unique
+  email                String    @unique
+  name                 String
+  about                String?
+  dob                  DateTime?
+  totalFollowers       Int       @default(0)
+  totalFollowing       Int       @default(0)
+  totalPosts           Int       @default(0)
+  status               String    @default("active")
+  isPrivate            Boolean   @default(false)
+  profileImage         String?
+  userInterest         String[]  @default([])
+  lastReadNotification DateTime?
+  emailVerified        Boolean   @default(false)
+  notificationId       String?
+  socialId             String?
+  socialType           String?   @default("email")
+  isOnline             Boolean   @default(false)
+  createdAt            DateTime  @default(now())
+  lastSeen             DateTime?
+  updatedAt            DateTime  @updatedAt
+  deletedAt            DateTime?
+  address              String[]  @default([])
+  Post                 Post[]
+  Comment              Comment[]
+}
+
+model OTP {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique // Ensure each user can only have one OTP at a time
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  description   String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  settings      Json?
+  tags          String[]
+  media         Json[]
+  totalLikes    Int       @default(0)
+  totalComments Int       @default(0)
+  totalViews    Int       @default(0)
+  totalShare    Int       @default(0)
+  location      String?
+  userId        String    @db.ObjectId
+  user          User      @relation(fields: [userId], references: [id])
+
+  Comment Comment[]
+}
+
+model Comment {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  content String
+  post    Post   @relation(fields: [postId], references: [id])
+  postId  String @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String @db.ObjectId
+}
