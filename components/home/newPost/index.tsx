@@ -32,7 +32,7 @@ import Header from "./header";
 import axios from "axios";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { addPost, setIsNewPost } from "@/store/postSlice";
+import { addPost, refetchPost } from "@/store/postSlice";
 import { AvatarProvider } from "@/components/avatar-provider";
 const MAX_CHAR_LIMIT = 2200;
 interface Props {
@@ -118,7 +118,7 @@ const NewPost: NextPage<Props> = ({ open, setOpen }) => {
       };
       dispatch(addPost(addData));
       setStep(5);
-      dispatch(setIsNewPost(true));
+      dispatch(refetchPost(true));
     } catch (error) {
       toast.error("Something went wrong");
       setOpen(false);
