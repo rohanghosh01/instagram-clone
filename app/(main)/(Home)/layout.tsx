@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col sm:flex-row h-screen z-10">
+    <div className="flex flex-col sm:flex-row z-10">
       <Header />
 
       {/* Sidebar - always fixed on larger screens, hidden on mobile */}

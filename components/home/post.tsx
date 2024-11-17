@@ -4,55 +4,28 @@ import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Carousel,
-  CarouselApi,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import {
-  Heart,
-  MessageCircle,
-  Send,
-  Bookmark,
-  MoreHorizontal,
-} from "lucide-react";
-import Image from "next/image";
-import VideoPost from "./video";
+import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
 import CarouselComponent from "../carousel-content";
 import { PostProps } from "@/types/postType";
 import { formatDate } from "@/lib/format-date";
 import { AvatarProvider } from "../avatar-provider";
-import { cn } from "@/lib/utils";
+import PostMoreDialog from "./post-more-dialog";
+import { useRouter } from "next/navigation";
 
 export default function Post({ data }: { data: PostProps }) {
   const [isLiked, setIsLiked] = React.useState(false);
-  const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
-  const [count, setCount] = React.useState(0);
   const [isExpanded, setIsExpanded] = React.useState(false);
-
+  const router = useRouter();
   const toggleDescription = () => {
     setIsExpanded(!isExpanded);
   };
   const truncatedText = data?.description.slice(0, 100);
 
-  React.useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    });
-  }, [api]);
-
   const toggleLike = () => setIsLiked(!isLiked);
+  const handleProfileClick = () => {
+    // Open profile modal
+    router.push(`/${data.user.username}?tab=posts`);
+  };
 
   return (
     <div className="overflow-hidden w-auto flex items-center justify-center max-sm:justify-start p-4 max-sm:pr-8">
@@ -60,15 +33,20 @@ export default function Post({ data }: { data: PostProps }) {
         <CardContent className="p-0">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center space-x-2">
-              <AvatarProvider
-                url={data?.user?.profileImage || ""}
-                alt={data?.user?.name}
-                className="w-8 h-8 rounded-full"
-              />
+              <div onClick={handleProfileClick} className=" cursor-pointer">
+                <AvatarProvider
+                  url={data?.user?.profileImage || ""}
+                  alt={data?.user?.name}
+                  className="w-8 h-8 rounded-full"
+                />
+              </div>
 
               <div className="flex flex-col justify-start">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm">
+                  <span
+                    className="font-semibold text-sm cursor-pointer"
+                    onClick={handleProfileClick}
+                  >
                     {data?.user?.username}
                   </span>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -82,13 +60,14 @@ export default function Post({ data }: { data: PostProps }) {
                 <span className="text-xs">{data.location}</span>
               </div>
             </div>
-            <Button
+            <PostMoreDialog />
+            {/* <Button
               variant="ghost"
               size="icon"
               className="text-black dark:text-white"
             >
               <MoreHorizontal className="w-5 h-5" />
-            </Button>
+            </Button> */}
           </div>
 
           <CarouselComponent data={data?.media} />

@@ -1,11 +1,19 @@
-'use client'
-import { createContext, useContext, useState, ReactNode } from "react";
+"use client";
+import { decryptData } from "@/lib/cryptoUtils";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
 type RootContextType = {
   isLoading: boolean;
   setLoading: (loading: boolean) => void;
   error: string | null;
   setError: (error: string | null) => void;
+  userData: any;
   // Add more states as needed
 };
 
@@ -14,10 +22,19 @@ const RootContext = createContext<RootContextType | undefined>(undefined);
 export const RootProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const userInfo = localStorage.getItem("userInfo");
+    if (userInfo) {
+      let decodedUserInfo = JSON.parse(decryptData(userInfo));
+      setUserData(decodedUserInfo);
+    }
+  }, []);
 
   return (
     <RootContext.Provider
-      value={{ isLoading, setLoading: setIsLoading, error, setError }}
+      value={{ isLoading, setLoading: setIsLoading, error, setError, userData }}
     >
       {children}
     </RootContext.Provider>

@@ -34,6 +34,8 @@ import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { addPost, refetchPost } from "@/store/postSlice";
 import { AvatarProvider } from "@/components/avatar-provider";
+import { useRootContext } from "@/context/rootContext";
+import { useDeviceType } from "@/hooks/check-device-type";
 const MAX_CHAR_LIMIT = 2200;
 interface Props {
   open: boolean;
@@ -53,11 +55,12 @@ const NewPost: NextPage<Props> = ({ open, setOpen }) => {
     hideLikeAndView: false,
     hideComments: false,
   });
-
+  const deviceType = useDeviceType();
   const [text, setText] = useState<string>("");
   const [location, setLocation] = useState("");
   const dispatch = useAppDispatch();
-  const currentUser = useAppSelector((state) => state.user.currentUser);
+  const { userData: currentUser } = useRootContext();
+  // const currentUser = useAppSelector((state) => state.user.currentUser);
 
   const handleTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     let { value } = e.target;
@@ -170,11 +173,15 @@ const NewPost: NextPage<Props> = ({ open, setOpen }) => {
                   ></path>
                 </svg>
               </div>
-              <p className="text-lg font-medium mb-2">
-                Drag photos and videos here
-              </p>
+              {deviceType === "desktop" && (
+                <p className="text-lg font-medium mb-2">
+                  Drag photos and videos here
+                </p>
+              )}
               <Button className="mt-2 bg-blue-500 h-8 hover:bg-blue-600 text-white">
-                Select from computer
+                {deviceType === "mobile"
+                  ? "Select Image from device"
+                  : "Select from computer"}
               </Button>
             </div>
           </div>

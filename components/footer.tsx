@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import { TagProps, tags } from "@/configs/footer-tags";
+import { TagProps, tags } from "@/config/footer-tags";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 

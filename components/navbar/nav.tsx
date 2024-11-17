@@ -8,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import NewPost from "../home/newPost";
 import { useAppDispatch } from "@/store";
 import { refetchPost } from "@/store/postSlice";
+import { useRootContext } from "@/context/rootContext";
 
 interface Props {
   item: NavItem;
@@ -15,6 +16,8 @@ interface Props {
 }
 
 const SingleNav: NextPage<Props> = ({ item, isMobile }) => {
+  const { userData } = useRootContext();
+
   const [currentPath, setCurrentPath] = useState("/");
   const router = useRouter();
   const pathname = usePathname();
@@ -26,7 +29,9 @@ const SingleNav: NextPage<Props> = ({ item, isMobile }) => {
   }, [pathname]);
 
   const handleClick = (path: string) => {
-    if (path == "/create") {
+    if (path == "/profile") {
+      router.push(`/${userData?.username}?tab=posts`);
+    } else if (path == "/create") {
       setNewPostOpen(true);
     } else {
       if (path == "/") {

@@ -19,6 +19,7 @@ import React, { useState } from "react";
 import SingleNav from "./nav";
 import { MoreDropdown } from "./more-dropdown";
 import Link from "next/link";
+import { ReelsSvg } from "../icons/reels";
 
 export interface NavItem {
   icon: any;
@@ -32,7 +33,7 @@ export default function Sidebar() {
     { icon: Home, label: "Home", path: "/" },
     { icon: Search, label: "Search", path: "/search" },
     { icon: Compass, label: "Explore", path: "/explore" },
-    { icon: Film, label: "Reels", path: "/reels" },
+    { icon: ReelsSvg, label: "Reels", path: "/reels" },
     { icon: MessageCircle, label: "Messages", path: "/messages", badge: 3 },
     { icon: Heart, label: "Notifications", path: "/notifications" },
     { icon: PlusSquare, label: "Create", path: "/create" },

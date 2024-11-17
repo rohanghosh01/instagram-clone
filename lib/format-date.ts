@@ -10,9 +10,5 @@ export function formatDate(date: string): string {
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
   if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`;
-
-  if (diffInSeconds < 2419200) return `${Math.floor(diffInSeconds / 604800)}w`;
-
-  // For dates older than 1 week, format as specific date
-  return inputDate.format("MMMM DD");
+  return `${Math.floor(diffInSeconds / 604800)}w`;
 }

@@ -61,17 +61,29 @@ export async function GET(req: NextRequest) {
       limit = 10,
       offset = 0,
       sort = "desc",
+      username = "", // Add this line if you want to restrict posts to a specific user
     } = Object.fromEntries(new URL(req.url).searchParams);
 
     // Fetch posts with limit, offset, search, sort, and user info
+    let params: any = {
+      OR: [
+        { description: { contains: search, mode: "insensitive" } }, // Search by description
+        { tags: { hasSome: [search] } }, // Search by tags (if tag matches)
+      ],
+    };
+
+    if (username) {
+      let getUser = await prisma.user.findUnique({
+        where: {
+          username,
+        },
+      });
+      if (getUser) {
+        params.userId = getUser.id;
+      }
+    }
     const results = await prisma.post.findMany({
-      where: {
-        OR: [
-          { description: { contains: search, mode: "insensitive" } }, // Search by description
-          { tags: { hasSome: [search] } }, // Search by tags (if tag matches)
-        ],
-        // userId: userId
-      },
+      where: params,
       take: Number(limit), // Limit the number of posts
       skip: Number(offset), // Offset for pagination
       orderBy: {
@@ -98,7 +110,15 @@ export async function GET(req: NextRequest) {
     const previousId =
       Number(offset) === 0 ? 0 : Number(offset) - Number(limit);
 
-    return NextResponse.json({ results, nextId, previousId }, { status: 200 });
+    const finalResult = results.map((result) => ({
+      ...result,
+      myAccount: result.userId === userId,
+    }));
+
+    return NextResponse.json(
+      { results: finalResult, nextId, previousId },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error GET posts:", error);
     return NextResponse.json({ error: "Failed to GET posts" }, { status: 500 });

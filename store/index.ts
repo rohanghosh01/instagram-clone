@@ -26,17 +26,17 @@ const storage =
     ? createWebStorage("local")
     : createNoopStorage();
 
-const postPersistConfig = {
-  key: "posts",
+const userPersistConfig = {
+  key: "userInfo",
   storage: storage,
-  whitelist: ["posts"],
+  whitelist: ["userInfo"],
 };
 
-const persistedReducer = persistReducer(postPersistConfig, postReducer);
+const userPersistReducer = persistReducer(userPersistConfig, userReducer);
 
 const rootReducer = combineReducers({
   post: postReducer,
-  user: userReducer,
+  user: userPersistReducer,
   story: storyReducer,
 });
 
@@ -44,6 +44,7 @@ export const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),
+  devTools: process.env.NODE_ENV !== "production",
 });
 
 export type RootState = ReturnType<typeof store.getState>;

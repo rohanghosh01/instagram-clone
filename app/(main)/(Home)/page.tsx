@@ -22,6 +22,8 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
 import { refetchPost } from "@/store/postSlice";
 import { useRootContext } from "@/context/rootContext";
+import { encryptData } from "@/lib/cryptoUtils";
+import { UseFetchQuery } from "@/hooks/use-query";
 const queryClient = new QueryClient();
 
 const Page = () => {
@@ -51,6 +53,8 @@ const Page = () => {
       const response = await axios.get("/api/auth/user");
       const { result } = response.data;
       dispatch(setUser(result));
+      const encryptedData = encryptData(result);
+      localStorage.setItem("userInfo", encryptedData);
     } catch (error: any) {
       console.log("error get user", error);
       throw new Error(error.message);
@@ -71,16 +75,7 @@ const Page = () => {
     isFetching,
     isFetchingNextPage,
     refetch,
-  } = useInfiniteQuery({
-    queryKey: ["posts"],
-    queryFn: fetchPosts,
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => lastPage.nextId, // Adjust based on your response
-    getPreviousPageParam: (firstPage) => firstPage.previousId, // Adjust based on your response
-    refetchOnWindowFocus: false, // Prevent refetch when the window is focused
-    refetchOnReconnect: false, // Prevent refetch when reconnecting to the network
-    staleTime: 5 * 60 * 1000, // Consider the data fresh for 5 minutes
-  });
+  } = UseFetchQuery({ fetchData: fetchPosts });
 
   useEffect(() => {
     if (inView && hasNextPage) {
@@ -127,7 +122,7 @@ const Page = () => {
           <StatusCarousel />
 
           <div className="flex-1 max-md:w-auto" ref={postRef}>
-            {data?.pages?.map((page, index) => (
+            {data?.pages?.map((page: any, index: number) => (
               <Fragment key={index}>
                 {page?.results?.map((item: PostProps) => (
                   <Post key={item.id} data={item} />
