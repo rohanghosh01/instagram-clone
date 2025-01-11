@@ -16,8 +16,8 @@ export const UseFetchQuery = ({ fetchData }: any): any => {
     queryKey: ["posts"],
     queryFn: fetchData,
     initialPageParam: 0,
-    getNextPageParam: (lastPage: any) => lastPage.nextId, // Adjust based on your response
-    getPreviousPageParam: (firstPage: any) => firstPage.previousId, // Adjust based on your response
+    getNextPageParam: (lastPage: any) => lastPage?.nextId, // Adjust based on your response
+    getPreviousPageParam: (firstPage: any) => firstPage?.previousId, // Adjust based on your response
     refetchOnWindowFocus: false, // Prevent refetch when the window is focused
     refetchOnReconnect: false, // Prevent refetch when reconnecting to the network
     staleTime: 5 * 60 * 1000, // Consider the data fresh for 5 minutes

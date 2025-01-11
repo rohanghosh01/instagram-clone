@@ -54,12 +54,12 @@ const CarouselComponent: NextPage<Props> = ({
       >
         <CarouselContent
           className={cn(
-            "h-full flex ",
+            "h-full flex max-h-[35rem] max-w-max",
             isNewChat ? "items-start" : "items-center"
           )}
         >
           {data?.map(({ url, type }: any, index: number) => (
-            <CarouselItem key={index} className="h-full">
+            <CarouselItem key={index} className="h-full w-full">
               {type == "image" ? (
                 <Image
                   src={url}
@@ -67,7 +67,10 @@ const CarouselComponent: NextPage<Props> = ({
                   width={1000}
                   height={1000}
                   loading="lazy"
-                  className={cn("object-cover transition-all h-full w-full",isNewChat && 'max-h-[30rem] max-w-[30rem]')}
+                  className={cn(
+                    "object-cover transition-all max-h-[35rem] max-sm:max-h-[25rem]",
+                    isNewChat && "max-h-[30rem] max-w-[30rem]"
+                  )}
                   placeholder="blur"
                   blurDataURL={url}
                 />

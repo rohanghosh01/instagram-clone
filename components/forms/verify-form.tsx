@@ -12,11 +12,13 @@ import LoadingButton from "../loading-btn";
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { useRootContext } from "@/context/rootContext";
 interface Props {}
+import * as API from "../../services/api";
+import { decodeJwt } from "@/lib/jwt-decode";
+import { setCookie } from "@/lib/cookie";
 
 const VerifyForm: NextPage<Props> = ({}) => {
   const [errorMessage, setErrorMessage] = useState("");
@@ -24,10 +26,9 @@ const VerifyForm: NextPage<Props> = ({}) => {
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(40); // 40 seconds cooldown
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email");
   const dispatch = useAppDispatch();
   const { setLoading: setMainLoading } = useRootContext();
+  const [tokenData, setTokenData] = useState<any | null>(null);
 
   // Handle countdown timer for resending OTP
   useEffect(() => {
@@ -39,14 +40,30 @@ const VerifyForm: NextPage<Props> = ({}) => {
     }
   }, [resendCooldown]);
 
+  useEffect(() => {
+    let data = localStorage.getItem("verify_token");
+    setTimeout(() => {
+      if (data) {
+        const decode = decodeJwt(data);
+        setTokenData(decode);
+      } else {
+        router.push("/accounts");
+      }
+    }, 100);
+  }, []);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     setMainLoading(true);
     try {
-      if (!email) throw new Error("Email is required");
-      const res = await axios.post("/api/auth/verify", { otp: code, email });
-      dispatch(setUser(res.data?.user));
+      if (!tokenData?.email) throw new Error("Email is required");
+      let verify_token = localStorage.getItem("verify_token");
+      if (!verify_token) return;
+      const res: any = await API.verification({ otp: code }, verify_token);
+      localStorage.removeItem("verify_token"); // Clear the token from local storage
+      setCookie("token", res?.accessToken);
+      setCookie("session_id", res?.sessionId);
       setLoading(false);
       setMainLoading(false);
       router.push("/");
@@ -62,7 +79,7 @@ const VerifyForm: NextPage<Props> = ({}) => {
   const handleResend = async () => {
     if (resendCooldown === 0) {
       try {
-        await axios.post("/api/auth/resend", { email: email });
+        await axios.post("/api/auth/resend", { email: tokenData?.email });
         toast("Resend otp successful. Please check your email for the OTP.");
         setResendCooldown(40); // Reset cooldown to 40 seconds
       } catch (error) {
@@ -71,14 +88,12 @@ const VerifyForm: NextPage<Props> = ({}) => {
     }
   };
 
-  if (!email) redirect("/accounts");
-
   return (
     <>
       <div className="flex text-center flex-col justify-center mb-3 gap-5">
         <span className="text-base font-semibold">Enter Confirmation Code</span>
         <span className=" text-base">
-          Enter the confirmation code we sent to {email}.{" "}
+          Enter the confirmation code we sent to {tokenData?.email}.{" "}
           <button
             className={cn(
               "text-blue-500 font-semibold",

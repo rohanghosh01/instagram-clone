@@ -10,22 +10,19 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { setUser } from "@/store/userSlice";
 import { PostProps } from "@/types/postType";
 import axios from "axios";
-import { Loader, RefreshCcw } from "lucide-react";
+import { Loader } from "lucide-react";
 import { Fragment, useEffect, useRef } from "react";
-import {
-  useInfiniteQuery,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { Button } from "@/components/ui/button";
 import { refetchPost } from "@/store/postSlice";
 import { useRootContext } from "@/context/rootContext";
 import { encryptData } from "@/lib/cryptoUtils";
 import { UseFetchQuery } from "@/hooks/use-query";
 const queryClient = new QueryClient();
-
+import * as API from "../../../services/api";
+import { redirect } from "next/navigation";
+import { deleteCookie } from "@/lib/cookie";
 const Page = () => {
   const { ref, inView } = useInView();
   const dispatch = useAppDispatch();
@@ -36,28 +33,33 @@ const Page = () => {
   const fetchPosts = async ({ pageParam = 0 }) => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `/api/post?offset=${pageParam}&limit=10`
-      );
+      const response: any = await API.feedList({
+        limit: 10,
+        offset: pageParam,
+      });
       setLoading(false);
-      return response.data; // Adjust based on your response
+      return response; // Adjust based on your response
     } catch (error: any) {
       setLoading(false);
-      throw new Error(error.message);
+      return;
+      // throw new Error(error.message);
     }
   };
 
   // Fetch user data
   const getUser = async () => {
     try {
-      const response = await axios.get("/api/auth/user");
-      const { result } = response.data;
+      const { result }: any = await API.profile();
       dispatch(setUser(result));
       const encryptedData = encryptData(result);
       localStorage.setItem("userInfo", encryptedData);
     } catch (error: any) {
       console.log("error get user", error);
-      throw new Error(error.message);
+      deleteCookie("token");
+      deleteCookie("session_id");
+      redirect("/account");
+
+      // throw new Error(error.message);
     }
   };
 
@@ -121,27 +123,35 @@ const Page = () => {
         <div className="w-full flex-1 flex flex-col gap-10 max-sm:gap-1 justify-center items-center">
           <StatusCarousel />
 
-          <div className="flex-1 max-md:w-auto" ref={postRef}>
-            {data?.pages?.map((page: any, index: number) => (
-              <Fragment key={index}>
-                {page?.results?.map((item: PostProps) => (
-                  <Post key={item.id} data={item} />
-                ))}
-              </Fragment>
-            ))}
-            <div>
-              <button
-                className="flex items-center justify-center w-full"
-                ref={ref}
-                onClick={() => fetchNextPage()}
-                disabled={!hasNextPage || isFetchingNextPage}
-              >
-                {isFetchingNextPage ? (
-                  <Loader className="animate-spin" />
-                ) : null}
-              </button>
+          {!data?.pages?.[0] ? (
+            <div className="flex flex-col gap-4  w-full my-20 justify-center items-center h-[30vh]">
+              <div className="text-lg font-bold text-gray-600">
+                Sorry :( There are now posts Start following to get posts
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex-1 max-md:w-auto" ref={postRef}>
+              {data?.pages?.map((page: any, index: number) => (
+                <Fragment key={index}>
+                  {page?.results?.map((item: PostProps) => (
+                    <Post key={item.id} data={item} />
+                  ))}
+                </Fragment>
+              ))}
+              <div>
+                <button
+                  className="flex items-center justify-center w-full"
+                  ref={ref}
+                  onClick={() => fetchNextPage()}
+                  disabled={!hasNextPage || isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? (
+                    <Loader className="animate-spin" />
+                  ) : null}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div>
             <Footer className="w-full" />

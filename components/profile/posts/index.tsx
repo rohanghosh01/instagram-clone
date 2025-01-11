@@ -13,6 +13,7 @@ import { PostProps } from "@/types/postType";
 import Post from "./post";
 import { useParams } from "next/navigation";
 const queryClient = new QueryClient();
+import * as API from "../../../services/api";
 
 interface Props {}
 
@@ -24,14 +25,13 @@ const Page: NextPage<Props> = () => {
   const fetchPosts = async ({ pageParam = 0 }) => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `/api/post?offset=${pageParam}&limit=10&username=${username}`
-      );
+      const response = await API.feedList({ limit: 10, offset: pageParam });
       setLoading(false);
-      return response.data; // Adjust based on your response
+      return response; // Adjust based on your response
     } catch (error: any) {
       setLoading(false);
-      throw new Error(error.message);
+      return;
+      // throw new Error(error.message);
     }
   };
   // Use useInfiniteQuery for infinite scrolling
@@ -51,6 +51,8 @@ const Page: NextPage<Props> = () => {
       fetchNextPage();
     }
   }, [fetchNextPage, inView, hasNextPage]);
+
+  console.log(">>", data?.pages);
 
   if (status === "pending") {
     return (
@@ -82,9 +84,10 @@ const Page: NextPage<Props> = () => {
               ))
             ) : (
               <>
-                {!data?.pages?.length && (
-                  <div className="text-center">No posts yet</div>
-                )}
+                {!data?.pages?.length ||
+                  (!data?.pages?.length?.[0] && (
+                    <div className="text-center text-muted-foreground">No posts yet</div>
+                  ))}
               </>
             )}
           </Fragment>

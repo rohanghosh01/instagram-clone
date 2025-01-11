@@ -5,11 +5,7 @@ export const metadata: Metadata = {
   title: "Verify • Instagram",
 };
 
-interface Props {
-  searchParams: {
-    email?: string;
-  };
-}
+interface Props {}
 
 const Page: NextPage<Props> = () => {
   return (

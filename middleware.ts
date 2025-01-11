@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(req: NextRequest) {
   // Get the session ID from cookies
-  const sessionId = req.cookies.get("session")?.value 
+  const sessionId = req.cookies.get("session_id")?.value 
 
   // If session is missing and user is not on the login page, redirect to login
   if (!sessionId && !req.nextUrl.pathname.startsWith("/accounts")) {

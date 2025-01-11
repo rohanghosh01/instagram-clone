@@ -7,7 +7,8 @@ export const login = async (data: any) => {
     return res;
   } catch (error: any) {
     console.log("error in login api", error);
-    throw new Error(error);
+    
+    throw new Error(error?.response?.data?.errorMessage || "internal error");
   }
 };
 
@@ -18,7 +19,7 @@ export const googleLogin = async (data: any) => {
     return res;
   } catch (error: any) {
     console.log("error in login api", error);
-    throw new Error(error);
+    throw new Error(error?.response?.data?.errorMessage || "internal error");
   }
 };
 
@@ -45,9 +46,10 @@ export const forgotPassword = async (data: any) => {
 };
 
 export const verification = async (data: any, token: any) => {
+  console.log(">>", { data, token });
   try {
     const res = await axios.post(`auth/verification`, data, {
-      headers: { Authorization: `Bearer ${JSON.parse(token)}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     return res;
@@ -103,13 +105,19 @@ export const changePassword = async (data: any) => {
   }
 };
 
-export const profile = async (id?: any) => {
+export const profile = async (id?: any, username?: string) => {
   let url = `user/profile`;
+  let params: any = {};
   if (id) {
-    url += `?id=${id}`;
+    params.id = id;
+  }
+  if (username) {
+    params.username = username;
   }
   try {
-    const res = await axios.get(url);
+    const res = await axios.get(url, {
+      params,
+    });
 
     return res;
   } catch (error: any) {
@@ -140,7 +148,7 @@ export const updateFeed = async (data: any) => {
   }
 };
 
-export const feedList = async (data: any) => {
+export const feedList = async (data?: any) => {
   let { limit = 10, offset = 0, userId = null } = data;
   let url = `feeds?limit=${limit}&offset=${offset}`;
   if (userId) {

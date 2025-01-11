@@ -1,14 +1,13 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Metadata, NextPage } from "next";
+import { NextPage } from "next";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import LoginFacebook from "./login-facebook";
 import LoadingButton from "../loading-btn";
-import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useRootContext } from "@/context/rootContext";
-
+import * as API from "../../services/api";
 interface Props {}
 
 interface FormValues {
@@ -33,17 +32,15 @@ const SignupForm: NextPage<Props> = ({}) => {
     setLoading(true);
     setMainLoading(true);
     try {
-      const res = await axios.post("/api/auth/register", values);
+      const res: any = await API.signup(values);
+      localStorage.setItem("verify_token", res?.accessToken);
       setLoading(false);
       setMainLoading(false);
-      router.push(`/accounts/verify?email=${encodeURIComponent(values.email)}`);
+      router.push(`/accounts/verify`);
       setErrorMessage("");
     } catch (error: any) {
       console.error(error);
-      if (error?.response?.statusText == "username_exist") {
-        setSuggestions(error?.response?.data?.suggestions || []);
-      }
-      setErrorMessage(error?.response?.data?.error || "Internal issue");
+      setErrorMessage(error.message || "Internal issue");
       setLoading(false);
       setMainLoading(false);
     }

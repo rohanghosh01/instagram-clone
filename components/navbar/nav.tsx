@@ -9,6 +9,7 @@ import NewPost from "../home/newPost";
 import { useAppDispatch } from "@/store";
 import { refetchPost } from "@/store/postSlice";
 import { useRootContext } from "@/context/rootContext";
+import { getCookie } from "@/lib/cookie";
 
 interface Props {
   item: NavItem;
@@ -23,14 +24,17 @@ const SingleNav: NextPage<Props> = ({ item, isMobile }) => {
   const pathname = usePathname();
   const [newPostOpen, setNewPostOpen] = useState(false);
   const dispatch = useAppDispatch();
-
   useEffect(() => {
     setCurrentPath(pathname);
   }, [pathname]);
 
   const handleClick = (path: string) => {
     if (path == "/profile") {
-      router.push(`/${userData?.username}?tab=posts`);
+      let username = userData?.username;
+      if (username.includes("@")) {
+        username = username.substring(0, username.length);
+      }
+      router.push(`/${username}?tab=posts`);
     } else if (path == "/create") {
       setNewPostOpen(true);
     } else {

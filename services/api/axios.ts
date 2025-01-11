@@ -15,7 +15,7 @@ const userInstance = axios.create({
 userInstance.interceptors.request.use(async (config) => {
   const token: any = getCookie("token");
   if (token) {
-    config.headers.Authorization = "Bearer " + JSON.parse(token);
+    config.headers.Authorization = "Bearer " + token;
   }
   return config;
 });
@@ -30,10 +30,10 @@ userInstance.interceptors.response.use(
   async function (error) {
     // Do something with response error
     let err = error?.response?.data?.errorMessage || "internal error";
-    if (error.response.status === 401) {
+    if (error?.response?.status === 401) {
       document.location.replace("/auth/login");
     } else {
-      if (error.response.status !== 404) {
+      if (error?.response?.status !== 404) {
         notify(err);
       }
     }

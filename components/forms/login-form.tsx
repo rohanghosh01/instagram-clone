@@ -7,12 +7,12 @@ import { useForm } from "react-hook-form";
 import LoginFacebook from "./login-facebook";
 import Link from "next/link";
 import LoadingButton from "../loading-btn";
-import { useFetch } from "@/hooks/use-fetch";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store";
-import { setUser } from "@/store/userSlice";
 import { useRootContext } from "@/context/rootContext";
+import { setCookie } from "@/lib/cookie";
+import * as API from "../../services/api";
 
 interface Props {}
 
@@ -33,8 +33,9 @@ const LoginForm: NextPage<Props> = ({}) => {
     setLoading(true);
     setMainLoading(true);
     try {
-      const { data } = await axios.post("/api/auth/login", values);
-      dispatch(setUser(data?.user));
+      const res: any = await API.login(values);
+      setCookie("token", res?.accessToken);
+      setCookie("session_id", res?.sessionId);
       setLoading(false);
       setMainLoading(false);
       router.push("/");
@@ -48,7 +49,7 @@ const LoginForm: NextPage<Props> = ({}) => {
           )}`
         );
       }
-      setErrorMessage(error?.response?.data?.error || "Internal issue");
+      setErrorMessage(error?.message || "Internal issue");
       setLoading(false);
       setMainLoading(false);
     }

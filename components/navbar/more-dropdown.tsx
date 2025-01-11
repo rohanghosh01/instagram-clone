@@ -25,14 +25,19 @@ import {
 import { ReactNode } from "react";
 import { useTheme } from "next-themes";
 import axios from "axios";
+import { deleteCookie } from "@/lib/cookie";
+import { redirect } from "next/navigation";
 
 export function MoreDropdown({ children }: { children: ReactNode }) {
   const { setTheme, theme } = useTheme();
 
   const handleLogout = async () => {
     try {
-      await axios.post("/api/auth/logout");
+      // await axios.post("/api/auth/logout");
+      deleteCookie("token");
+      deleteCookie("session_id");
       window.location.assign("/accounts");
+      // redirect("/account");
     } catch (error) {
       console.error(error);
     }

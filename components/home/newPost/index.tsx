@@ -37,6 +37,7 @@ import { AvatarProvider } from "@/components/avatar-provider";
 import { useRootContext } from "@/context/rootContext";
 import { useDeviceType } from "@/hooks/check-device-type";
 const MAX_CHAR_LIMIT = 2200;
+import * as API from "../../../services/api";
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -109,9 +110,10 @@ const NewPost: NextPage<Props> = ({ open, setOpen }) => {
       const response = await axios.post("/api/upload", formData);
       data.media = response.data.results;
 
-      const dbResult = await axios.post("/api/post", data);
+      const dbResult: any = await API.createFeed(data);
+
       const addData = {
-        ...dbResult.data,
+        ...dbResult?.result,
         user: {
           name: currentUser?.name,
           username: currentUser?.username,

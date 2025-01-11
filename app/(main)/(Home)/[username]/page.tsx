@@ -25,6 +25,7 @@ import {
   useSearchParams,
 } from "next/navigation";
 import { useEffect, useState } from "react";
+import * as API from "../../../../services/api";
 
 interface PageProps {
   params: {
@@ -45,14 +46,15 @@ export default function ProfilePage({ params }: PageProps) {
   const getUser = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/user/${params.username}`);
-      const { result } = response.data;
+      const response: any = await API.profile(null, params.username);
+
+      const { result } = response;
       setProfileData(result);
       setLoading(false);
     } catch (error: any) {
       console.log("error get user", error);
       setLoading(false);
-      throw new Error(error.message);
+      // throw new Error(error.message);
     }
   };
 
@@ -101,9 +103,12 @@ export default function ProfilePage({ params }: PageProps) {
                 <div className="flex flex-col gap-4">
                   {profileData?.myAccount ? (
                     <div className="flex flex-wrap gap-2 items-center">
-                      <Button className="h-7" variant="secondary">
-                        Edit Profile
-                      </Button>
+                      <Link href={`${params.username}/edit`}>
+                        <Button className="h-7" variant="secondary">
+                          Edit Profile
+                        </Button>
+                      </Link>
+
                       <Button className="h-7" variant="secondary">
                         View archive
                       </Button>

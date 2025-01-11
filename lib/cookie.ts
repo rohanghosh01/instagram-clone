@@ -28,6 +28,9 @@ export function setCookie(name: string, value: string): void {
   const encryptedValue: string = encrypt(value);
   document.cookie = `${name}= ${encryptedValue}; expires=${expire}; path=/`;
 }
+export function deleteCookie(name: string): void {
+  document.cookie = `${name}=;`;
+}
 
 // // Get Cookie function with decryption
 export function getCookie(name: string): string | null {
